@@ -3,18 +3,59 @@ name: Python Tests
 on:
   push:
     branches: [main]
-  
+  pull-request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: '3.12'
+
 jobs:
-  test:
+  # First job
+  security:
+    name: Security Checks
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{env.PYTHON_VERSION}}
+    
+    # Check for known security vulnerabilities in dependencies
+    - name: Install safety
+      run: pip install safety
+
+    - name: Run security checks
+      run: |
+        # Check for known security vulnerabilities
+        safety check --json
+
+    # Scan for secrets that might have been accidentally committed
+    - name: Run secret detection
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
+
+  
+  # Second job
+  test:
+    name: FastAPI Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: ${{env.PYTHON_VERSION}}
     
     - name: Install dependencies
       run: |
