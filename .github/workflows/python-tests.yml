@@ -19,9 +19,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Run Tests
+    - name: Run Functions Tests
       run: |
         pytest functions_to_test.py
+
+    - name: Run FastAPI Tests
+      run: |
+        pytest test_main.py
