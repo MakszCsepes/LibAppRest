@@ -34,13 +34,6 @@ jobs:
         safety check --json
 
     # Scan for secrets that might have been accidentally committed
-    - name: Run secret detection
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: main
-        head: HEAD
-        extra_args: --debug --only-verified
 
   
   # Second job

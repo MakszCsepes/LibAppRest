@@ -1,6 +1,23 @@
 from fastapi import FastAPI
 from datetime import datetime
 
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import text
+from sqlalchemy.exc import OperationalError
+
+import os
+
+
+DATABASE_URL = "postgresql://{}:{}@localhost:{}/{}".format(os.environ.get('M_DB_USER'),
+                                                           os.environ.get('M_DB_PASS'),
+                                                           os.environ.get('M_DB_PORT'),
+                                                           os.environ.get('M_DB_NAME'))
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+metadata = MetaData()
+    
 app = FastAPI()
 
 
@@ -9,9 +26,11 @@ def read_root():
     return {"message": "Hello. Today is {}th day of the week!".format(datetime.today().weekday())}
 
 @app.get("/books")
-def resources():
-    res = [
-        {"name": "book1", "category": "cat1", "date_published": "1990"},
-        {"name": "book2", "category": "cat2", "date_published": "2002"}
-    ]
-    return {"books": res}
+def books():
+    try:
+        with engine.connect() as conn:
+            res = conn.execute(text("SELECT * FROM books")).mappings()
+            books = [dict(row) for row in res]
+    except OperationalError:
+        return {"status": "DB connection failed"}
+    return {"books": books}

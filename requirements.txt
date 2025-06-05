@@ -1,4 +1,6 @@
-unicorn
+uvicorn
 fastapi
 httpx
 pytest
+sqlalchemy
+psycopg2
