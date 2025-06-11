@@ -48,6 +48,15 @@ def read_root():
 
 @app.get("/books")
 def books():
+    if mode == "mock":
+        return {"books": 
+                [
+                    {"id": 1, "title": "1984", "author": "George Orwell"},
+                    {"id": 2, "title": "To Kill a Mockingbird", "author": "Harper Lee"},
+                    {"id": 3, "title": "The Great Gatsby", "author": "F. Scott Fitzgerald"}
+                ]
+                }
+
     if not engine:
         return {"status": "DB connection failed"}
 
@@ -58,3 +67,11 @@ def books():
     except OperationalError:
         return {"status": "DB connection failed"}
     return {"books": books}
+
+@app.get("/cpu")
+def cpu():
+
+    list_of_squares = [x**2 for x in range(100000)]
+    list_of_squares.sort(reverse=True)
+
+    return {"message": "Emulating CPU usage by creating a long random list and sorting it"}
