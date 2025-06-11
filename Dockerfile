@@ -7,7 +7,8 @@ WORKDIR /app
 COPY requirements.txt .
 
 # install FastAPI with all its dependencies
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the local script into the container
 COPY main.py .
