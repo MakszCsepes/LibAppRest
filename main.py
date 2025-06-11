@@ -9,8 +9,7 @@ from sqlalchemy.exc import OperationalError
 import os
 
 
-
-def check_env_variables():
+def check_db_env_variables():
     required_env_vars = ["M_DB_USER", "M_DB_PASS", "M_DB_PORT", "M_DB_NAME"]
     missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
     
@@ -19,14 +18,19 @@ def check_env_variables():
     
     return True
 
-check_env_variables()
 
-DATABASE_URL = "postgresql://{}:{}@localhost:{}/{}".format(os.environ.get('M_DB_USER'),
-                                                           os.environ.get('M_DB_PASS'),
-                                                           os.environ.get('M_DB_PORT'),
-                                                           os.environ.get('M_DB_NAME'))
+mode = "reg"
+if os.environ.get('FAP_MODE'):
+    mode = os.environ.get('FAP_MODE')
+
 engine = None
-if check_env_variables():
+
+if mode == "reg" and check_db_env_variables():
+    DATABASE_URL = "postgresql://{}:{}@localhost:{}/{}".format(os.environ.get('M_DB_USER'),
+                                                               os.environ.get('M_DB_PASS'),
+                                                               os.environ.get('M_DB_PORT'),
+                                                               os.environ.get('M_DB_NAME'))
+
     engine = create_engine(DATABASE_URL)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     metadata = MetaData()
@@ -37,7 +41,10 @@ app = FastAPI()
 
 @app.get("/")
 def read_root():
-    return {"message": "Hello. Today is {}th day of the week!".format(datetime.today().weekday())}
+    return {
+            "message": "Hello. Today is {}th day of the week!".format(datetime.today().weekday()),
+            "mode": mode
+           }
 
 @app.get("/books")
 def books():
