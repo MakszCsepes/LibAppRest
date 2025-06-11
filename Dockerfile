@@ -3,8 +3,11 @@ FROM python:3.10-slim
 # Set the working directory in the container
 WORKDIR /app
 
-# install FastAPI
-RUN pip install fastapi uvicorn
+# Copy requirements first for better caching
+COPY requirements.txt .
+
+# install FastAPI with all its dependencies
+RUN pip install -r requirements.txt
 
 # Copy the local script into the container
 COPY main.py .
